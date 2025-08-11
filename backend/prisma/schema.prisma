@@ -14,6 +14,7 @@ enum UserRole {
   CUSTOMER
   END_USER
   ADMIN
+  STAFF // NEW: optional for pickup/delivery teams
 }
 
 enum RentalStatus {
@@ -52,8 +53,11 @@ model User {
   passwordHash   String
   role           UserRole       @default(CUSTOMER)
   phone          String?
-  rentals        Rental[]
+  rentals        Rental[]       @relation("CustomerRentals")
   notifications  Notification[]
+  rentalHistoryChanges RentalHistory[] @relation("RentalHistoryChangedBy")
+  pickups        Pickup[]       @relation("PickupAssignedStaff")
+  returns        RentalReturn[] @relation("ReturnAssignedStaff")
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
@@ -66,6 +70,7 @@ model Product {
   isRentable       Boolean               @default(true)
   unitType         String
   basePrice        Float
+  stock            Int                   @default(1) // NEW: quantity available
   rentalDurations  RentalDuration[]
   availability     ProductAvailability[]
   rentals          Rental[]
@@ -93,21 +98,33 @@ model ProductAvailability {
 
 model Rental {
   id           String         @id @default(cuid())
-  customer     User           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderReference String       @unique // NEW: human-readable order number
+  customer     User           @relation("CustomerRentals", fields: [customerId], references: [id], onDelete: Cascade)
   customerId   String
   product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId    String
   startDate    DateTime
   endDate      DateTime
   status       RentalStatus   @default(QUOTATION)
-
   quotation    Quotation?
   pickup       Pickup?
   returnRecord RentalReturn?
-
   invoices     Invoice[]
+  rentalHistories RentalHistory[]
+  notifications Notification[] // NEW: link notifications to rental
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+}
+
+model RentalHistory {
+  id          String       @id @default(cuid())
+  rental      Rental       @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  rentalId    String
+  oldStatus   RentalStatus
+  newStatus   RentalStatus
+  changedAt   DateTime     @default(now())
+  changedById String?
+  changedBy   User?        @relation("RentalHistoryChangedBy", fields: [changedById], references: [id])
 }
 
 model Quotation {
@@ -116,25 +133,33 @@ model Quotation {
   rentalId   String   @unique
   price      Float
   validTill  DateTime?
+  notes      String?  // NEW: terms or conditions
   isAccepted Boolean  @default(false)
   createdAt  DateTime @default(now())
 }
 
 model Pickup {
-  id        String   @id @default(cuid())
-  rental    Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
-  rentalId  String   @unique
-  scheduled DateTime
-  completed Boolean  @default(false)
+  id            String   @id @default(cuid())
+  rental        Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  rentalId      String   @unique
+  scheduled     DateTime
+  actualPickup  DateTime? // NEW: actual date/time
+  completed     Boolean  @default(false)
+  staffId       String?  // NEW: assigned staff
+  staff         User?    @relation("PickupAssignedStaff", fields: [staffId], references: [id])
 }
 
 model RentalReturn {
-  id        String   @id @default(cuid())
-  rental    Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
-  rentalId  String   @unique
-  scheduled DateTime
-  completed Boolean  @default(false)
-  lateFee   Float?
+  id            String   @id @default(cuid())
+  rental        Rental   @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  rentalId      String   @unique
+  scheduled     DateTime
+  actualReturn  DateTime? // NEW: actual date/time
+  completed     Boolean  @default(false)
+  lateFee       Float?
+  daysLate      Int?     // NEW: reporting field
+  staffId       String?  // NEW: assigned staff
+  staff         User?    @relation("ReturnAssignedStaff", fields: [staffId], references: [id])
 }
 
 model Pricelist {
@@ -143,6 +168,7 @@ model Pricelist {
   description String?
   validFrom   DateTime
   validTo     DateTime
+  customerGroup String? // NEW: e.g., VIP, Corporate
   items       PricelistItem[]
 }
 
@@ -184,6 +210,9 @@ model Notification {
   message   String
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+  rental    Rental?          @relation(fields: [rentalId], references: [id])
+  rentalId  String?          // NEW: link to rental
   sendDate  DateTime
   isRead    Boolean          @default(false)
 }
+  
