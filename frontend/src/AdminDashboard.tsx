@@ -1,34 +1,39 @@
-import React, { useState } from 'react';
-import Sidebar from './components/common/Sidebar';
-import Header from './components/common/Header';
-import Dashboard from './pages/Dashboard';
-import Products from './pages/Products';
-import Delivery from './pages/Delivery';
-import Sustainability from './pages/Sustainability';
-import ComingSoon from './pages/ComingSoon';
-import { sidebarItems } from './data/mockData';
+import React, { useState } from "react";
+import Sidebar from "./components/common/Sidebar";
+import Header from "./components/common/Header";
+import Dashboard from "./pages/Dashboard";
+import Products from "./pages/Products";
+import Delivery from "./pages/Delivery";
+import Sustainability from "./pages/Sustainability";
+import ComingSoon from "./pages/ComingSoon";
+import DamageChecker from "./pages/Damage-detector";
+import { sidebarItems } from "./data/mockData";
 
 interface AdminDashboardProps {
   onLogout: () => void;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const getPageTitle = () => {
-    return sidebarItems.find(item => item.id === activeTab)?.label || 'Dashboard';
+    return (
+      sidebarItems.find((item) => item.id === activeTab)?.label || "Dashboard"
+    );
   };
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard />;
-      case 'products':
+      case "products":
         return <Products />;
-      case 'delivery':
+      case "delivery":
         return <Delivery />;
-      case 'sustainability':
+      case "sustainability":
         return <Sustainability />;
+      case "scans":
+        return <DamageChecker />;
       default:
         return <ComingSoon title={getPageTitle()} />;
     }
@@ -45,9 +50,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
 
       <div className="flex-1 overflow-auto">
         <Header title={getPageTitle()} />
-        <main className="p-6">
-          {renderContent()}
-        </main>
+        <main className="p-6">{renderContent()}</main>
       </div>
     </div>
   );

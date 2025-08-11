@@ -159,7 +159,7 @@ export const sidebarItems: SidebarItem[] = [
   { id: 'availability', label: 'Availability Calendar', icon: Calendar },
   { id: 'orders', label: 'Orders & Contracts', icon: FileText },
   { id: 'delivery', label: 'Delivery Management', icon: Truck },
-  { id: 'reports', label: 'AI Condition Reports', icon: AlertCircle },
+  { id: 'scans', label: 'AI Condition Reports', icon: AlertCircle },
   { id: 'invoicing', label: 'Invoicing & Payments', icon: DollarSign },
   { id: 'analytics', label: 'Reports & Analytics', icon: BarChart3 },
   { id: 'sustainability', label: 'Sustainability', icon: Leaf },

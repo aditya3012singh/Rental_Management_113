@@ -3,11 +3,27 @@ from fastapi.responses import JSONResponse
 from ultralytics import YOLO
 from PIL import Image
 import io
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 # Load your trained model (make sure best.pt is in same folder)
 model = YOLO('best.pt')
+
+# Allow your React dev server origin or all origins
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    # you can add more allowed origins here
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or use ["*"] to allow all origins (not recommended for production)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/detect-damage")
 async def detect_damage(file: UploadFile = File(...)):
@@ -38,7 +54,7 @@ async def detect_damage(file: UploadFile = File(...)):
         if len(response) != 0:
             return JSONResponse(content={"message": "No damage detected"}, status_code=200)
 
-        return JSONResponse(content={"message": "damage detected", "detections": response})
+        return JSONResponse(content={"message": "Damage detected", "detections": response})
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

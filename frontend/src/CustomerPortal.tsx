@@ -11,6 +11,7 @@ import CalendarPage from './pages/customer/Calendar';
 import Contracts from './pages/customer/Contracts';
 import Payments from './pages/customer/Payments';
 import ComingSoon from './pages/ComingSoon';
+import DamageChecker from './pages/Damage-detector';
 import { sustainabilityData } from './data/customerData';
 import { SidebarItem } from './types';
 
@@ -50,6 +51,8 @@ const CustomerPortal: React.FC<CustomerPortalProps> = ({ onLogout }) => {
         return <Contracts />;
       case 'payments':
         return <Payments />;
+      case 'scans':
+        return <DamageChecker />;
       default:
         return <ComingSoon title={getPageTitle()} />;
     }
