@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "./AdminDashboard";
 import CustomerPortal from "./CustomerPortal";
-import EndUserPortal from "./EndUserPortal";
+
 import Chatbot from "./components/Chatbot";
 import { MessageCircle, X } from "lucide-react"; 
 import Login from "./pages/Login";
